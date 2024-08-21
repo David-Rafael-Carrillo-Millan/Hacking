@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, url_for, redirect, flash, jsonify
+from flask import Flask, render_template, request, url_for, redirect, flash, jsonify, Response
+import os
 from flask_mysqldb import MySQL
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -30,19 +31,8 @@ mail = Mail()
 def load_user(id):
     return ModeloUsuario.obtener_por_id(db, id)
 
-
-
-# @app.route("/password/<password>")
-# def generar_password(password):
-#     encriptado = generate_password_hash(password)
-#     valor = check_password_hash(encriptado, password)
-#     return "Encriptado: {0} ! Coincide: {1}".format(encriptado, valor)
-
 @app.route("/login", methods = ['GET','POST'])
 def login():
-    # print(f"El metodo es: {request.method}")
-    # print(f"EL usuario es: {request.form['usuario']}")
-    # print(f"La contraseña es: {request.form['password']}")
 
     if request.method == 'POST':
         usuario = Usuario(None, request.form['usuario'], request.form['password'], None, None, None, None, None, None, None)
@@ -56,6 +46,25 @@ def login():
             return render_template('auth/login.html')
     else:
         return render_template('auth/login.html')
+    
+@app.route("/index2", methods = ['GET','POST'])
+def index2():
+    page = request.args.get('page')
+    
+    if not page:
+        page = 'index2.html'
+
+    page_path = os.path.join(os.getcwd(), page)
+
+    if not os.path.exists(page_path):
+        return f"El archivo {page} no existe en el sistema", 404
+
+    try:
+        with open(page_path, 'r') as file:
+            content = file.read()
+        return Response(content, mimetype='text/html')
+    except Exception as e:
+        return f"Error al cargar el archivo: {str(e)}", 404
 
 @app.route('/logout')
 def logout():
@@ -169,8 +178,8 @@ def comprar_libro():
     return jsonify(data)
 
 
-def pagina_no_encontrada(error):
-    return render_template('errores/404.html'), 404
+# def pagina_no_encontrada(error):
+#     return render_template('errores/404.html'), 404
 
 def pagina_no_autorizada(error):
     return redirect(url_for('login'))
@@ -180,5 +189,5 @@ def inicializar_app(config):
     csrf.init_app(app)
     mail.init_app(app)
     app.register_error_handler(401, pagina_no_autorizada)
-    app.register_error_handler(404, pagina_no_encontrada)
+    # app.register_error_handler(404, pagina_no_encontrada)
     return app

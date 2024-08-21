@@ -7,20 +7,23 @@ class ModeloUsuario():
         """Iniciar sesion"""
         try:
             cursor = db.connection.cursor()
-            user = usuario.usuario
-            print(f'primer user {user}')
             sql = f"SELECT id, usuario, password FROM usuario WHERE usuario = '{usuario.usuario}'"
             #sql = f"SELECT id, usuario, password FROM usuario WHERE usuario = 'ejemploUsuario' OR '1'='1'"
-            print(f'segundo user {user}')
             #sql = """SELECT id, usuario, password FROM usuario WHERE usuario = '{0}'""".format(usuario.usuario)
             cursor.execute(sql)
             data = cursor.fetchone()
             print(data)
-            if data != None:
+            if data:
                 usuario_logueado = Usuario(data[0], data[1], None, None, None, None, None, None, None, None)
                 return usuario_logueado
             else:
                 return None
+
+            # if data != None:
+            #     usuario_logueado = Usuario(data[0], data[1], None, None, None, None, None, None, None, None)
+            #     return usuario_logueado
+            # else:
+            #     return None
         except Exception as ex:
             raise Exception(ex)
 
